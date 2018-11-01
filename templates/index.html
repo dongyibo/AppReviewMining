@@ -1,0 +1,179 @@
+$def with(data,category,page,maxPage,appId)
+<html lang="en" xmlns:>
+<head>
+    <meta charset="UTF-8">
+    <title>数据展示</title>
+
+    <link rel="stylesheet" href='../static/bootstrap/css/bootstrap.min.css'>
+    <link rel="stylesheet" href='../static/css/my.css'>
+</head>
+<body>
+
+<nav id="nav" class="navbar navbar-default" role="navigation">
+    <div>
+        <ul class="nav nav-pills">
+            <li
+                    $if category==1:
+                    class="active"
+            >
+                <a href="/?page=1&appId=$appId">Bug reporting</a>
+            </li>
+            <li
+                    $if category==2:
+                    class="active"
+            >
+                <a href="/showSuggestion?page=1&appId=$appId">Suggestion for new feature</a>
+            </li>
+            <li class="dropdown
+                $if category==5 or category==6:
+                   active
+                ">
+              <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                Aborted <span class="caret"></span>
+              </a>
+              <ul class="dropdown-menu">
+                <li><a href="abortBug?page=1&appId=$appId">Bug</a></li>
+                <li><a href="abortSuggestion?page=1&appId=$appId">Suggestion</a></li>
+              </ul>
+            </li>
+        </ul>
+    </div>
+    <div id="app-nav">
+        <ul class="nav nav-tabs">
+          <li
+                  $if appId==482:
+                    class="active"
+          ><a href="?page=1&appId=482">knox</a></li>
+          <li
+                  $if appId==481:
+                    class="active"
+          ><a href="?page=1&appId=481">My knox</a></li>
+          <li
+                  $if appId==483:
+                    class="active"
+          ><a href="?page=1&appId=483">ScanAndSave</a></li>
+          <li
+                  $if appId==484:
+                    class="active"
+          ><a href="?page=1&appId=484">Tiny Scanner</a></li>
+          <li
+                  $if appId==485:
+                    class="active"
+          ><a href="?page=1&appId=485">cardboard</a></li>
+          <li
+                  $if appId==486:
+                    class="active"
+          ><a href="?page=1&appId=486">PrinterShare</a></li>
+        </ul>
+    </div>
+</nav>
+
+<div class="row" id="show">
+    <div class="col-md-10 col-md-offset-1">
+        $for d in data:
+        <div
+                $if category==1:
+                    class="panel panel-danger"
+                $elif category==2:
+                    class="panel panel-info"
+                $elif category==5:
+                    class="panel panel-warning"
+                $else:
+                    class="panel panel-success"
+        >
+            <div class="panel-heading">
+                <h3 class="panel-title">
+                    $if category == 1:
+                        Bug $d[0]
+                    $else:
+                        Suggestion $d[0]
+                    <span class="badge badge_span">$len(d[1])</span>
+                    $if category==1:
+                        <button class="btn btn-danger pull-right" style="margin-top: -7px;" onclick="abort($d[1][0][4],$category,$appId,this);">abort it</button>
+                    $elif category==2:
+                        <button class="btn btn-info pull-right" style="margin-top: -7px;" onclick="abort($d[1][0][4],$category,$appId,this);">abort it</button>
+                    $elif category==5:
+                        <button class="btn btn-warning pull-right" style="margin-top: -7px;" onclick="recover($d[1][0][4],$category,$appId,this);">recover it</button>
+                    $else:
+                        <button class="btn btn-success pull-right" style="margin-top: -7px;" onclick="recover($d[1][0][4],$category,$appId,this);">recover it</button>
+                </h3>
+            </div>
+            <div class="panel-body">
+                <ul class="list-group">
+                    $for i in range(len(d[1])):
+                        $if i==0:
+                            <li class="list-group-item">
+                                <div class="row">
+                                    <div class="bug-div">
+                                        $d[1][i][2]
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div align="right" class="bug-author-div">
+                                        -- By $d[1][i][0]&nbsp;&nbsp;$d[1][i][1]&nbsp;&nbsp;rated $d[1][i][3]
+                                    </div>
+                                </div>
+                            </li>
+                            $if len(d[1])>1:
+                                <div class="row">
+                                    <div class="col-md-1" style="margin-left:45%">
+                                        <button type="button" class="btn btn-primary btn-xs" onclick="more(this);">more<span class="caret"></span></button>
+                                    </div>
+                                </div>
+                        $else:
+                            <li class="list-group-item roll-up" style="display: none;">
+                                <div class="row">
+                                    <div class="bug-div">
+                                        $d[1][i][2]
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div align="right" class="bug-author-div">
+                                        -- By $d[1][i][0]&nbsp;&nbsp;$d[1][i][1]&nbsp;&nbsp;rated $d[1][i][3]
+                                    </div>
+                                </div>
+                            </li>
+                    <div class="row dropup" style="display: none;">
+                            <div class="col-md-1" style="margin-left:45%">
+                                <button type="button" class="btn btn-primary btn-xs" onclick="roll(this);">roll up<span class="caret"></span></button>
+                            </div>
+                    </div>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div align="center">
+        <ul class="pagination">
+            <li><a href="#">&laquo;</a></li>
+            $for i in range(maxPage):
+                $if page == i+1:
+                    $if category == 1:
+                        <li class="active"><a href="?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                    $elif category == 2:
+                        <li class="active"><a href="showSuggestion?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                    $elif category == 5:
+                        <li class="active"><a href="abortBug?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                    $else:
+                        <li class="active"><a href="abortSuggestion?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                $else:
+                    $if category == 1:
+                        <li><a href="?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                    $elif category == 2:
+                        <li><a href="showSuggestion?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                    $elif category == 5:
+                        <li><a href="abortBug?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+                    $else:
+                        <li><a href="abortSuggestion?page=$(i+1)&appId=$appId">$(i+1)</a></li>
+            <li><a href="#">&raquo;</a></li>
+        </ul>
+    </div>
+</div>
+
+</body>
+<script src='../static/js/my.js'></script>
+<script src='../static/jquery/jquery.min.js'></script>
+<script src='../static/bootstrap/js/bootstrap.min.js'></script>
+</html>
